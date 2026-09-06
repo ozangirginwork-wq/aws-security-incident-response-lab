@@ -63,6 +63,22 @@ The tests cover risky and safe network rules, remediation correlation, privilege
 
 Raw screenshots are intentionally excluded because they contain identifying account and session metadata. No passwords, MFA seeds, secret keys, or session tokens are stored in this repository.
 
+## Sanitized evidence snapshots
+
+These portfolio-safe images were reconstructed exclusively from the sanitized CloudTrail dataset. They are not raw AWS console captures. The account number, source IP, security-group ID, and related identifiers are documentation placeholders.
+
+### Public SSH detection
+
+![Sanitized CloudTrail evidence showing public SSH exposure](docs/assets/evidence/public-ssh-detection.png)
+
+### Public SSH remediation
+
+![Sanitized CloudTrail evidence showing the public SSH rule being revoked](docs/assets/evidence/public-ssh-remediation.png)
+
+### Excessive IAM privilege remediation
+
+![Sanitized CloudTrail evidence showing AdministratorAccess attachment and detachment](docs/assets/evidence/iam-privilege-remediation.png)
+
 ## Optional Terraform baseline
 
 The root Terraform configuration provides a low-cost secure VPC baseline with separate public and private subnets. The intentionally insecure security-group example is isolated in `scenarios/insecure-security-group` and is not referenced by the root module. Terraform was not deployed during the live investigation.
