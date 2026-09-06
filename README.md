@@ -4,16 +4,16 @@
 
 A $0 AWS security operations portfolio lab demonstrating controlled misconfiguration, CloudTrail investigation, remediation, cleanup, and automated detection engineering.
 
-## What I performed
+## Lab overview
 
-I completed two controlled scenarios in a personal AWS lab account while signed in as an MFA-authenticated IAM administrator. I created only temporary, unused resources and removed them after collecting evidence.
+Two controlled security scenarios were carried out in a personal AWS lab account using an MFA-authenticated IAM administrator. Only temporary, unused resources were created, and each was removed after the required evidence had been collected.
 
 | Scenario | Risk introduced | CloudTrail evidence | Remediation | Impact |
 |---|---|---|---|---|
 | Public SSH exposure | `AuthorizeSecurityGroupIngress` allowed TCP/22 from `0.0.0.0/0` | Actor, source, target security group, ports, CIDR, region, and MFA state | Removed the rule and verified `RevokeSecurityGroupIngress` | None—the security group was never attached to a resource |
 | Excessive IAM privilege | `AdministratorAccess` was attached directly to `incident-test-user` | `AttachUserPolicy` identified the actor, target user, and policy ARN | Detached the policy and verified `DetachUserPolicy` | None—the test user had no password, keys, group membership, or activity |
 
-I then deleted both temporary resources and verified `DeleteUser` and `DeleteSecurityGroup` in CloudTrail.
+After remediation was verified, both temporary resources were deleted and the corresponding `DeleteUser` and `DeleteSecurityGroup` events were confirmed in CloudTrail.
 
 ```mermaid
 flowchart TD
@@ -120,7 +120,7 @@ The root Terraform configuration provides a low-cost secure VPC baseline with se
 
 ## Interview summary
 
-I built and executed a controlled AWS incident-response lab covering public network exposure and excessive IAM privilege. I investigated the management-plane activity in CloudTrail, validated MFA-backed attribution, remediated each issue, verified the compensating API events, cleaned up all temporary resources, and converted the observed behavior into a tested Python detector and CI control.
+This project demonstrates an end-to-end AWS incident-response workflow covering public network exposure and excessive IAM privilege. The investigation correlated management-plane activity in CloudTrail with actor, target, source, and MFA context; each risky change was remediated and verified through its compensating API event. The observed behavior was then converted into a tested Python detector and CI control, with all temporary AWS resources removed after validation.
 
 ## License
 
