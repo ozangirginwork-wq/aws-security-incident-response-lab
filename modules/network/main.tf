@@ -1,4 +1,5 @@
 resource "aws_vpc" "this" {
+  #checkov:skip=CKV2_AWS_11: This low-cost lab baseline intentionally omits log ingestion; enable VPC Flow Logs for production deployments.
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -82,6 +83,7 @@ resource "aws_route_table_association" "private" {
 }
 
 resource "aws_security_group" "web" {
+  #checkov:skip=CKV2_AWS_5: This module defines reusable security-group templates and intentionally creates no billable workloads.
   name        = "${var.project_name}-web-sg"
   description = "Restricted HTTPS entry point"
   vpc_id      = aws_vpc.this.id
@@ -108,6 +110,7 @@ resource "aws_security_group" "web" {
 }
 
 resource "aws_security_group" "application" {
+  #checkov:skip=CKV2_AWS_5: This module defines reusable security-group templates and intentionally creates no billable workloads.
   name        = "${var.project_name}-app-sg"
   description = "Application traffic only from the web tier"
   vpc_id      = aws_vpc.this.id
