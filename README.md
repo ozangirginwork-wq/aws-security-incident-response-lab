@@ -127,3 +127,11 @@ This project follows an end-to-end AWS security investigation workflow, from int
 ## License
 
 MIT—see `LICENSE`.
+
+## Related portfolio labs
+
+[Lab 1: Linux support & troubleshooting](https://github.com/ozangirginwork-wq/linux-it-support-troubleshooting-lab) · [Lab 2: Windows Server & Active Directory](https://github.com/ozangirginwork-wq/windows-server-active-directory-lab) · [Lab 3: Python IT automation](https://github.com/ozangirginwork-wq/python-it-cloud-automation-lab) · [Lab 5: Secure Terraform & CI security](https://github.com/ozangirginwork-wq/terraform-cicd-pipeline) · [Lab 6: AWS automated incident response](https://github.com/ozangirginwork-wq/aws-security-automated-incident-response)
+
+## Detector correlation limits
+
+Failed AWS API calls are ignored as state changes. Ingress revocation must match the original protocol, port range and public CIDR before closing a finding. `RESOLVED` means a matching successful remediation event was observed in the supplied log set; this offline tool does not independently query current AWS state. Rule-ID-only revocations and omitted events require manual investigation.

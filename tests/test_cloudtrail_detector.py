@@ -74,5 +74,24 @@ class DetectorTests(unittest.TestCase):
             self.assertEqual(len(load_events(path)), 1)
 
 
+
+class FailedEventTests(unittest.TestCase):
+    def test_failed_authorization_creates_no_finding(self):
+        event = ingress_event()
+        event['errorCode'] = 'UnauthorizedOperation'
+        self.assertEqual(detect_findings([event]), [])
+
+    def test_failed_revoke_does_not_resolve(self):
+        revoke = ingress_event('RevokeSecurityGroupIngress')
+        revoke['errorCode'] = 'UnauthorizedOperation'
+        self.assertEqual(detect_findings([ingress_event(), revoke])[0].status, 'OPEN')
+
+    def test_exact_port_revoke_does_not_close_wider_rule(self):
+        authorize = ingress_event()
+        authorize['requestParameters']['ipPermissions']['items'][0]['toPort'] = 100
+        revoke = ingress_event('RevokeSecurityGroupIngress')
+        self.assertEqual(detect_findings([authorize, revoke])[0].status, 'OPEN')
+
+
 if __name__ == "__main__":
     unittest.main()

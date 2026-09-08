@@ -112,7 +112,7 @@ def _sensitive_ports(permission: dict[str, Any]) -> set[int]:
     return {port for port in SENSITIVE_PORTS if start <= port <= end}
 
 
-def _security_group_keys(event: dict[str, Any]) -> Iterable[tuple[str, int, str]]:
+def _security_group_keys(event: dict[str, Any]) -> Iterable[tuple[str, int, str, str]]:
     request = event.get("requestParameters", {})
     if not isinstance(request, dict):
         return
@@ -121,7 +121,10 @@ def _security_group_keys(event: dict[str, Any]) -> Iterable[tuple[str, int, str]
     for permission in permissions:
         for port in _sensitive_ports(permission):
             for cidr in _public_cidrs(permission):
-                yield group_id, port, cidr
+                protocol = str(permission.get("ipProtocol", "")).lower()
+                protocol = "tcp" if protocol == "6" else protocol
+                shape = f"{protocol}:{permission.get('fromPort')}:{permission.get('toPort')}"
+                yield group_id, port, cidr, shape
 
 
 def detect_findings(events: list[dict[str, Any]]) -> list[Finding]:
@@ -131,15 +134,18 @@ def detect_findings(events: list[dict[str, Any]]) -> list[Finding]:
     open_findings: dict[str, Finding] = {}
 
     for event in sorted(events, key=lambda item: str(item.get("eventTime", ""))):
+        # Failed API attempts do not change AWS resource state.
+        if event.get("errorCode") or event.get("errorMessage"):
+            continue
         event_name = event.get("eventName")
         request = event.get("requestParameters", {})
         if not isinstance(request, dict):
             request = {}
 
         if event_name == "AuthorizeSecurityGroupIngress":
-            for group_id, port, cidr in _security_group_keys(event):
+            for group_id, port, cidr, shape in _security_group_keys(event):
                 service, severity = SENSITIVE_PORTS[port]
-                key = f"sg:{group_id}:{port}:{cidr}"
+                key = f"sg:{group_id}:{port}:{cidr}:{shape}"
                 finding = Finding(
                     key=key,
                     rule_id="SG-PUBLIC-ADMIN",
@@ -154,8 +160,8 @@ def detect_findings(events: list[dict[str, Any]]) -> list[Finding]:
                 open_findings[key] = finding
 
         elif event_name == "RevokeSecurityGroupIngress":
-            for group_id, port, cidr in _security_group_keys(event):
-                key = f"sg:{group_id}:{port}:{cidr}"
+            for group_id, port, cidr, shape in _security_group_keys(event):
+                key = f"sg:{group_id}:{port}:{cidr}:{shape}"
                 finding = open_findings.pop(key, None)
                 if finding:
                     finding.resolve(event)
